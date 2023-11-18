@@ -1,4 +1,7 @@
-beautifulsoup4==4.10.0
+beautifulsoup4==4.12.2
 notify-py==0.3.42
 requests==2.31.0
+fuzzywuzzy~=0.18.0
+Levenshtein~=0.23.0
+lxml~=4.9.3
 flet==0.12.2

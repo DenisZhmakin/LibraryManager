@@ -1,3 +1,5 @@
+import webbrowser
+
 import flet as ft
 from notifypy import Notify
 
@@ -37,14 +39,15 @@ class MainView(ft.View):
                         scroll=ft.ScrollMode.HIDDEN,
                         controls=[
                             ft.DataTable(
+                                column_spacing=4,
                                 width=float("inf"),
                                 ref=self.author_books_datatable,
-                                border=ft.border.only(bottom=ft.BorderSide(2, 'white')),
                                 columns=[
                                     ft.DataColumn(ft.Text("Номер")),
                                     ft.DataColumn(ft.Text("Название")),
+                                    ft.DataColumn(ft.Text("Тип произведения")),
                                     ft.DataColumn(ft.Text("Год написания"), numeric=True),
-                                    ft.DataColumn(ft.Text("Рейтинг"), numeric=True)
+                                    ft.DataColumn(ft.Text("Рейтинг"), numeric=True),
                                 ],
                             )
                         ],
@@ -60,35 +63,36 @@ class MainView(ft.View):
         self.author_text_field.current.value = ""
         self.author_books_datatable.current.rows = []
 
+        self.page.title = "Library Manager"
         self.page.update()
 
-        authors = self.parser.get_authors(value)
+        if author_info := self.parser.get_author_info(value):
+            self.page.title = f"Автор: {value}"
+            self.page.update()
 
-        if authors:
-            author_info = self.parser.get_author_info(authors[0])
-
-            for index, book in enumerate(author_info.novels, 1):
+            for index, book in enumerate(author_info.books, 1):
                 self.author_books_datatable.current.rows.append(
                     ft.DataRow(
                         on_select_changed=self.on_select_changed_handler,
                         cells=[
                             ft.DataCell(ft.Text(f"{index}")),
                             ft.DataCell(ft.Text(book.name)),
-                            ft.DataCell(ft.Text(f"{book.year}")),
-                            ft.DataCell(ft.Text(str(book.rating))),
-                            ft.DataCell(ft.Text(str(book.link))),
+                            ft.DataCell(ft.Text(book.type)),
+                            ft.DataCell(ft.Text(book.year)),
+                            ft.DataCell(ft.Text(book.rating)),
+                            ft.DataCell(ft.Text(book.link)),
                         ],
                     ),
                 )
 
-                self.page.update()
+            self.page.update()
         else:
             notification = Notify()
             notification.title = "Library Manager"
-            notification.message = "Автор не найден"
+            notification.message = f"'{value}' не найден"
             notification.send()
 
     @classmethod
     def on_select_changed_handler(cls, event):
         book_url = event.control.cells[-1].content.value
-        print(book_url)
+        webbrowser.open_new(book_url)
