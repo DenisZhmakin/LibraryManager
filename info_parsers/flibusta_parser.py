@@ -67,44 +67,46 @@ class FantlabParser(AbstractParser):
             })
             soup = BeautifulSoup(response.text, 'lxml')
 
-            if works_div := soup.select_one("div.works"):
-                counter = Counter([elem.text.strip() for elem in works_div.select("div.autor")])
+            works_div = soup.select_one("div.works")
 
-                if len(counter) == 0:
-                    return None
-
-                author_name = counter.most_common(1)[0][0]
-
-                author = Author(name=author_name)
-
-                for work_div in works_div.select("div.one"):
-                    work_author = work_div.select_one("div.autor").text.strip()
-
-                    if work_author != author_name:
-                        continue
-
-                    book_title = temp.text.strip() if (temp := work_div.select_one("div.title")) else ''
-                    book_plus = temp.text.strip() if (temp := work_div.select_one("div.plus")) else ''
-
-                    if not all([book_title, book_plus]):
-                        continue
-
-                    book_type = book_plus.split(', ')[-1].capitalize()
-
-                    # TODO: Включить 'Цикл','Поэма','Пьеса'.
-                    if book_type not in ['Роман', 'Повесть', 'Рассказ']:
-                        continue
-
-                    author.books.append(
-                        Book(
-                            name=book_title.split('/')[0],
-                            type=book_type,
-                            year=int(parts[0] if len((parts := book_plus.split(', '))) > 1 else 0),
-                            rating=float(big.text if (big := work_div.select_one("big")) else 0.0),
-                            link=fantlab_url + work_div.select_one("div.title").a['href']
-                        )
-                    )
-
-                return author
-            else:
+            if not works_div:
                 return None
+
+            counter = Counter([elem.text.strip() for elem in works_div.select("div.autor")])
+
+            if len(counter) == 0:
+                return None
+
+            author_name = counter.most_common(1)[0][0]
+
+            author = Author(name=author_name)
+
+            for work_div in works_div.select("div.one"):
+                work_author = work_div.select_one("div.autor").text.strip()
+
+                if work_author != author_name:
+                    continue
+
+                book_title = temp.text.strip() if (temp := work_div.select_one("div.title")) else ''
+                book_plus = temp.text.strip() if (temp := work_div.select_one("div.plus")) else ''
+
+                if not all([book_title, book_plus]):
+                    continue
+
+                book_type = book_plus.split(', ')[-1].capitalize()
+
+                # TODO: Включить 'Цикл','Поэма','Пьеса'.
+                if book_type not in ['Роман', 'Повесть', 'Рассказ']:
+                    continue
+
+                author.books.append(
+                    Book(
+                        name=book_title.split('/')[0],
+                        type=book_type,
+                        year=int(parts[0] if len((parts := book_plus.split(', '))) > 1 else 0),
+                        rating=float(big.text if (big := work_div.select_one("big")) else 0.0),
+                        link=fantlab_url + work_div.select_one("div.title").a['href']
+                    )
+                )
+
+            return author
