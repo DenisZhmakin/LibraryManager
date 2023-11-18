@@ -40,11 +40,13 @@ class FantlabParser(AbstractParser):
                 dots_div = item.select_one("div.dots")
                 rating_span = item.find("span", id=re.compile(r"^m_"))
 
+                book_info = dots_div.find("a", {"title": None}, recursive=True)
+
                 books.append(Book(
-                    name=dots_div.select_one("a").text.strip(),
+                    name=book_info.text.strip(),
                     year=int(dots_div.select_one("font").text),
                     rating=float(rating_span.text.split()[0] if rating_span else 'nan'),
-                    link=fantlab_url + dots_div.select_one("a")['href']
+                    link=fantlab_url + book_info['href']
                 ))
 
             return books
@@ -52,7 +54,7 @@ class FantlabParser(AbstractParser):
         return Author(
             name=soup.find("h1", {'itemprop': 'name'}, recursive=True).text,
             country=soup.find("span", {'itemprop': 'nationality'}, recursive=True).text,
-            novels=get_book_list(soup.select_one("#novel_info")),
+            novels=get_book_list(soup.select_one("tbody#novel_info")),
             stories=get_book_list(soup.select_one("#story_info")),
             short_stories=get_book_list(soup.select_one("#shortstory_info"))
         )

@@ -1,3 +1,4 @@
 beautifulsoup4==4.10.0
+notify-py==0.3.42
 requests==2.31.0
-flet~=0.12.1
+flet==0.12.2
