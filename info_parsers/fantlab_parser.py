@@ -2,9 +2,11 @@ import re
 from collections import Counter
 from typing import Optional
 
-from requests import get
 from bs4 import BeautifulSoup, Tag
-from fuzzywuzzy import process as fuzz_process
+from libs.sorter import orderby
+
+from rapidfuzz import fuzz
+from requests import get
 
 from entities import Author, Book
 
@@ -40,28 +42,30 @@ class FantlabParser:
             return books
 
         if authors_div := soup.select_one("div.autors"):
-            authors = [
-                {
-                    'name': div.select_one("div.title").select_one("a").text,
-                    'href': fantlab_url + div.a['href']
-                } for div in authors_div.select("div.one")
-            ]
+            authors = sorted(
+                [
+                    {
+                        'name': div.select_one("div.title").select_one("a").text,
+                        'ratio': fuzz.token_sort_ratio(query, div.select_one("div.title").select_one("a").text),
+                        'href': fantlab_url + div.a['href']
+                    } for div in authors_div.select("div.one")
+                ],
+                key=orderby('ratio ASC'), reverse=True
+            )
 
-            author = fuzz_process.extractOne(query, authors)
-
-            response = get(author[0]['href'])
+            response = get(authors[0]['href'])
             soup = BeautifulSoup(response.text, 'lxml')
-
-            author_books = get_book_list(soup.select_one("tbody#novel_info"), 'Роман')
-            author_books.extend(get_book_list(soup.select_one("#story_info"), 'Повесть')),
-            author_books.extend(get_book_list(soup.select_one("#shortstory_info"), 'Рассказ'))
 
             fullname_raw = soup.find("h1", {'itemprop': 'name'}, recursive=True).text
             fullname = re.sub(r"\(.*\)", "", fullname_raw)
 
             return Author(
                 fullname=fullname,
-                books=author_books
+                books=[
+                    *get_book_list(soup.select_one("tbody#novel_info"), 'Роман'),
+                    *get_book_list(soup.select_one("#story_info"), 'Повесть'),
+                    *get_book_list(soup.select_one("#shortstory_info"), 'Рассказ')
+                ]
             )
         else:
             response = get(f"{fantlab_url}/search-works", params={

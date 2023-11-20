@@ -2,7 +2,9 @@ import re
 
 import requests
 from bs4 import BeautifulSoup
-from orderby import orderby
+from rapidfuzz import fuzz
+
+from libs.sorter import orderby
 
 flibusta_url = "http://flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion"
 
@@ -50,13 +52,16 @@ class FlibustaParser:
         books = []
         for index, book_div in enumerate(books_form.findAll("div"), 1):
             books.append({
+                'name': book_name,
                 'size': book_div.find("span", {"style": "size"}).text,
-                'name': book_div.find("a", href=re.compile(r'^/b/\d*$')).text,
+                'ratio': fuzz.WRatio(book_name, book_div.find("a", href=re.compile(r'^/b/\d*$')).text),
                 'rating': RATING.get(book_div.find("img")['title']),
                 'link': flibusta_url + book_div.find("a", href=re.compile(r'fb2$'))['href'],
                 'order': index
             })
 
-        books = sorted(books, key=orderby('name ASC, rating ASC, order DESC'), reverse=True)
+        books = sorted(books, key=orderby('rating ASC, ratio ASC, order DESC'), reverse=True)
+
+        print(books)
 
         return books

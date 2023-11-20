@@ -1,11 +1,11 @@
 beautifulsoup4==4.12.2
 notify-py==0.3.42
 requests==2.31.0
-fuzzywuzzy~=0.18.0
-Levenshtein~=0.23.0
+rapidfuzz~=3.5.2
+pysocks~=1.7.1
 pymorphy2~=0.9.1
 lxml~=4.9.3
 flet==0.12.2
 
 
-orderby~=0.0.2
+
