@@ -3,13 +3,12 @@ import webbrowser
 import flet as ft
 from notifypy import Notify
 
-from info_parsers import FantlabParser
+from parsers import FantlabParser, FlibustaParser
 
 
 class MainView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
-        self.parser = FantlabParser()
 
         self.author_books_datatable = ft.Ref[ft.DataTable]()
         self.author_text_field = ft.Ref[ft.TextField]()
@@ -66,11 +65,11 @@ class MainView(ft.View):
         self.page.title = "Library Manager"
         self.page.update()
 
-        if author_info := self.parser.get_author_info(value):
+        if author := FantlabParser.get_author_info(value):
             self.page.title = f"Автор: {value}"
             self.page.update()
 
-            for index, book in enumerate(author_info.books, 1):
+            for index, book in enumerate(author.books, 1):
                 self.author_books_datatable.current.rows.append(
                     ft.DataRow(
                         on_select_changed=self.on_select_changed_handler,
@@ -80,6 +79,7 @@ class MainView(ft.View):
                             ft.DataCell(ft.Text(book.type)),
                             ft.DataCell(ft.Text(book.year)),
                             ft.DataCell(ft.Text(book.rating)),
+                            ft.DataCell(ft.Text(author.surname)),
                             ft.DataCell(ft.Text(book.link)),
                         ],
                     ),
@@ -94,5 +94,11 @@ class MainView(ft.View):
 
     @classmethod
     def on_select_changed_handler(cls, event):
-        book_url = event.control.cells[-1].content.value
-        webbrowser.open_new(book_url)
+        book_name = event.control.cells[1].content.value
+        author_name = event.control.cells[-2].content.value
+        FlibustaParser.get_book_info(author_name, book_name)
+
+        notification = Notify()
+        notification.title = "Library Manager"
+        notification.message = f"Скачивание книги завершено"
+        notification.send()

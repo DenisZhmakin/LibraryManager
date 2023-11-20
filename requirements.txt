@@ -5,3 +5,5 @@ fuzzywuzzy~=0.18.0
 Levenshtein~=0.23.0
 lxml~=4.9.3
 flet==0.12.2
+
+torpy~=1.1.6

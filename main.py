@@ -1,6 +1,6 @@
 import flet as ft
 
-from views.main_view import MainView
+from views import MainView
 
 
 def main(page: ft.Page):
@@ -26,4 +26,6 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(
+        target=main
+    )

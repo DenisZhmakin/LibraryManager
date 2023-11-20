@@ -7,13 +7,13 @@ from bs4 import BeautifulSoup, Tag
 from fuzzywuzzy import process as fuzz_process
 
 from entities import Author, Book
-from .abstract_parser import AbstractParser
 
 fantlab_url = "https://fantlab.ru"
 
 
-class FantlabParser(AbstractParser):
-    def get_author_info(self, query: str) -> Optional[Author]:
+class FantlabParser:
+    @classmethod
+    def get_author_info(cls, query: str) -> Optional[Author]:
         response = get(f"{fantlab_url}/searchmain", params={"searchstr": query})
         soup = BeautifulSoup(response.text, 'lxml')
 
@@ -56,8 +56,11 @@ class FantlabParser(AbstractParser):
             author_books.extend(get_book_list(soup.select_one("#story_info"), 'Повесть')),
             author_books.extend(get_book_list(soup.select_one("#shortstory_info"), 'Рассказ'))
 
+            fullname_raw = soup.find("h1", {'itemprop': 'name'}, recursive=True).text
+            fullname = re.sub(r"\(.*\)", "", fullname_raw)
+
             return Author(
-                name=soup.find("h1", {'itemprop': 'name'}, recursive=True).text,
+                fullname=fullname,
                 books=author_books
             )
         else:
@@ -79,7 +82,7 @@ class FantlabParser(AbstractParser):
 
             author_name = counter.most_common(1)[0][0]
 
-            author = Author(name=author_name)
+            author = Author(fullname=author_name)
 
             for work_div in works_div.select("div.one"):
                 work_author = work_div.select_one("div.autor").text.strip()
