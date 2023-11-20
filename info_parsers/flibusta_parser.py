@@ -57,6 +57,6 @@ class FlibustaParser:
                 'order': index
             })
 
-        books = sorted(books, key=orderby('rating ASC, order DESC'), reverse=True)
+        books = sorted(books, key=orderby('name ASC, rating ASC, order DESC'), reverse=True)
 
         return books
