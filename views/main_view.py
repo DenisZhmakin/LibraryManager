@@ -3,12 +3,13 @@ import webbrowser
 import flet as ft
 from notifypy import Notify
 
-from parsers import FantlabParser, FlibustaParser
+from info_parsers import FantlabParser, FlibustaParser
 
 
 class MainView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
+        self.flibusta_parser = FlibustaParser()
 
         self.author_books_datatable = ft.Ref[ft.DataTable]()
         self.author_text_field = ft.Ref[ft.TextField]()
@@ -92,13 +93,8 @@ class MainView(ft.View):
             notification.message = f"'{value}' не найден"
             notification.send()
 
-    @classmethod
-    def on_select_changed_handler(cls, event):
+    def on_select_changed_handler(self, event):
         book_name = event.control.cells[1].content.value
         author_name = event.control.cells[-2].content.value
-        FlibustaParser.get_book_info(author_name, book_name)
 
-        notification = Notify()
-        notification.title = "Library Manager"
-        notification.message = f"Скачивание книги завершено"
-        notification.send()
+        print(self.flibusta_parser.get_books(author_name, book_name))

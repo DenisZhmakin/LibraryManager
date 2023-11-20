@@ -1,5 +1,8 @@
+import pymorphy2
+
 from dataclasses import dataclass, field
 from typing import Optional
+
 
 from .book import Book
 
@@ -17,6 +20,7 @@ class Author:
     patronymic: Optional[str] = None
 
     def __post_init__(self):
+        morph = pymorphy2.MorphAnalyzer()
         parts = list(filter(lambda x: len(x) > 1, self.fullname.split()))
 
         if len(parts) == 2:
@@ -30,5 +34,7 @@ class Author:
             self.patronymic = parts[1]
         else:
             self.is_duet = True
-            self.surname = parts[-1][0:-1]
+            word = morph.parse(parts[-1])[0]
+
+            self.surname = str(word.normal_form).capitalize()
             self.names = parts[0:-1]
