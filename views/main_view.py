@@ -97,4 +97,6 @@ class MainView(ft.View):
         book_name = event.control.cells[1].content.value
         author_name = event.control.cells[-2].content.value
 
-        self.flibusta_parser.get_books(author_name, book_name)
+        book = self.flibusta_parser.get_books(author_name, book_name)
+
+        print(book)

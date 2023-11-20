@@ -62,6 +62,7 @@ class FlibustaParser:
 
         books = sorted(books, key=orderby('rating ASC, ratio ASC, order DESC'), reverse=True)
 
-        print(books)
+        if len(books) == 0:
+            return None
 
-        return books
+        return books[0]
