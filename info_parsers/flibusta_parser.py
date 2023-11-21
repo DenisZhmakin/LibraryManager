@@ -9,12 +9,12 @@ from libs.sorter import orderby
 flibusta_url = "http://flibustaongezhld6dibs2dps6vm4nvqg2kp7vgowbu76tzopgnhazqd.onion"
 
 RATING = {
+    'файл на 1': -3,
+    'файл на 2': -2,
+    'файл на 3': -1,
     'файл не оценен': 0,
-    'файл на 1': 1,
-    'файл на 2': 2,
-    'файл на 3': 3,
-    'файл на 4': 4,
-    'файл на 5': 5
+    'файл на 4': 1,
+    'файл на 5': 2
 }
 
 
