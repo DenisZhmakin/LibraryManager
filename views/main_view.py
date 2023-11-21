@@ -3,7 +3,7 @@ import webbrowser
 import flet as ft
 from notifypy import Notify
 
-from info_parsers import FantlabParser, FlibustaParser
+from parsers import FantlabParser, FlibustaParser
 
 
 class MainView(ft.View):
