@@ -1,5 +1,3 @@
-import webbrowser
-
 import flet as ft
 from notifypy import Notify
 

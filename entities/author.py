@@ -20,7 +20,7 @@ class Author:
     patronymic: Optional[str] = None
 
     def __post_init__(self):
-        morph = pymorphy2.MorphAnalyzer()
+        morph = pymorphy2.MorphAnalyzer(path='../assets/data')
         parts = list(filter(lambda x: len(x) > 1, self.fullname.split()))
 
         if len(parts) == 2:
