@@ -7,6 +7,7 @@ from parsers import FantlabParser, FlibustaParser
 class MainView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
+        self.fantlab_parser = FantlabParser()
         self.flibusta_parser = FlibustaParser()
 
         self.author_books_datatable = ft.Ref[ft.DataTable]()
@@ -64,7 +65,7 @@ class MainView(ft.View):
         self.page.title = "Library Manager"
         self.page.update()
 
-        if author := FantlabParser.get_author_info(value):
+        if author := self.fantlab_parser.get_author_info(value):
             self.page.title = f"Автор: {value}"
             self.page.update()
 
@@ -88,7 +89,7 @@ class MainView(ft.View):
         else:
             notification = Notify()
             notification.title = "Library Manager"
-            notification.message = f"'{value}' не найден"
+            notification.message = f"Автор '{value}' не найден"
             notification.send()
 
     def on_select_changed_handler(self, event):

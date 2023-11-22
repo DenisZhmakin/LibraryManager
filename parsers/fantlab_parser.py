@@ -28,7 +28,7 @@ class FantlabParser:
         if works_div := soup.select_one("div.works"):
             counter = Counter([elem.text.strip() for elem in works_div.select("div.autor")])
 
-            if len(counter) == 0:
+            if len(counter) == 0 or counter.most_common(1)[0][0] != query:
                 return None
 
             author_name = counter.most_common(1)[0][0]
