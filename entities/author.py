@@ -1,3 +1,6 @@
+import os
+from json import loads
+
 import pymorphy2
 
 from dataclasses import dataclass, field
@@ -20,7 +23,13 @@ class Author:
     patronymic: Optional[str] = None
 
     def __post_init__(self):
-        morph = pymorphy2.MorphAnalyzer(path='../assets/data')
+        is_production = loads(os.environ.get('IS_PRODUCTION', 'false'))
+
+        if is_production:
+            morph = pymorphy2.MorphAnalyzer(path='../assets/data')
+        else:
+            morph = pymorphy2.MorphAnalyzer()
+
         parts = list(filter(lambda x: len(x) > 1, self.fullname.split()))
 
         if len(parts) == 2:

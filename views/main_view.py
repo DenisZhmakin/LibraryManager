@@ -75,7 +75,7 @@ class MainView(ft.View):
                         cells=[
                             ft.DataCell(ft.Text(f"{index}")),
                             ft.DataCell(ft.Text(book.name)),
-                            ft.DataCell(ft.Text(book.type)),
+                            ft.DataCell(ft.Text(book.book_type)),
                             ft.DataCell(ft.Text(book.year)),
                             ft.DataCell(ft.Text(book.rating)),
                             ft.DataCell(ft.Text(author.surname)),
