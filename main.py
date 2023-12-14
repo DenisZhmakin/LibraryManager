@@ -7,7 +7,7 @@ from views import MainView, BookView
 def main(page: ft.Page):
     page.title = "Library Manager"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
-    page.client_storage.clear()
+    # page.client_storage.clear()
 
     page.window_width = 900
     page.window_max_width = 900
