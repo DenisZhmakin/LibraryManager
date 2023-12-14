@@ -6,6 +6,4 @@ pysocks~=1.7.1
 pymorphy2~=0.9.1
 lxml~=4.9.3
 flet==0.16.0
-
-
-
+repath~=0.9.0

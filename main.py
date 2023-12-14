@@ -1,11 +1,13 @@
 import flet as ft
+from repath import match
 
-from views import MainView
+from views import MainView, BookView
 
 
 def main(page: ft.Page):
     page.title = "Library Manager"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.client_storage.clear()
 
     page.window_width = 900
     page.window_max_width = 900
@@ -18,11 +20,22 @@ def main(page: ft.Page):
     page.window_maximizable = False
     page.padding = 0
 
-    main_view = MainView(page=page)
+    def route_change(route: ft.RouteChangeEvent):
+        page.views.clear()
 
-    page.add(
-        main_view.render()
-    )
+        if route.data == "/main":
+            page.views.append(
+                MainView(page=page, route="/main")
+            )
+
+        if "/book" in route.data:
+            page.views.append(
+                BookView(page=page, route="/book")
+            )
+        page.update()
+
+    page.on_route_change = route_change
+    page.go("/main")
 
 
 if __name__ == "__main__":

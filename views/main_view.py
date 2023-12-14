@@ -5,97 +5,106 @@ from parsers import FantlabParser, FlibustaParser
 
 
 class MainView(ft.View):
-    def __init__(self, page: ft.Page):
-        super().__init__()
-        self.fantlab_parser = FantlabParser()
-        self.flibusta_parser = FlibustaParser()
-
-        self.author_books_datatable = ft.Ref[ft.DataTable]()
-        self.author_text_field = ft.Ref[ft.TextField]()
-
+    def __init__(self, page: ft.Page, route: str):
+        super().__init__(route=route)
         self.page = page
 
-    def render(self):
-        return ft.Column(
-            spacing=0,
-            alignment=ft.MainAxisAlignment.START,
-            controls=[
-                ft.Container(
-                    margin=ft.margin.all(8),
-                    content=ft.TextField(
-                        label="Автор",
-                        ref=self.author_text_field,
-                        on_submit=self.on_submit_handler,
-                        border_color="white",
-                        border_radius=0,
-                        border_width=2,
+        self.author_textfield = ft.Ref[ft.TextField]()
+        self.book_datatable = ft.Ref[ft.DataTable]()
+
+        books = self.page.client_storage.get("books")
+        author = self.page.client_storage.get("author")
+
+        self.controls = [
+            ft.Column(
+                spacing=0,
+                alignment=ft.MainAxisAlignment.START,
+                controls=[
+                    ft.Container(
+                        margin=ft.margin.only(left=0, top=0, right=0, bottom=4),
+                        content=ft.TextField(
+                            label="Автор",
+                            ref=self.author_textfield,
+                            on_submit=self.on_submit_handler,
+                            border_color="white",
+                            border_radius=0,
+                            border_width=2,
+                        ),
                     ),
-                ),
-                ft.Container(
-                    border=ft.border.all(2, "white"),
-                    margin=ft.margin.only(left=8, top=0, right=8, bottom=8),
-                    content=ft.Column(
-                        scroll=ft.ScrollMode.HIDDEN,
-                        controls=[
-                            ft.DataTable(
-                                column_spacing=4,
-                                width=float("inf"),
-                                ref=self.author_books_datatable,
-                                columns=[
-                                    ft.DataColumn(ft.Text("Номер")),
-                                    ft.DataColumn(ft.Text("Название")),
-                                    ft.DataColumn(ft.Text("Тип произведения")),
-                                    ft.DataColumn(ft.Text("Год написания"), numeric=True),
-                                    ft.DataColumn(ft.Text("Рейтинг"), numeric=True),
-                                ],
-                            )
-                        ],
-                    ),
-                    expand=True,
-                )
-            ],
-            expand=True
-        )
+                    ft.Container(
+                        border=ft.border.all(2, "white"),
+                        margin=ft.margin.only(left=0, top=4, right=0, bottom=0),
+                        content=ft.Column(
+                            scroll=ft.ScrollMode.HIDDEN,
+                            controls=[
+                                ft.DataTable(
+                                    column_spacing=4,
+                                    width=float("inf"),
+                                    ref=self.book_datatable,
+                                    columns=[
+                                        ft.DataColumn(ft.Text("Номер")),
+                                        ft.DataColumn(ft.Text("Название")),
+                                        ft.DataColumn(ft.Text("Тип произведения")),
+                                        ft.DataColumn(ft.Text("Год написания"), numeric=True),
+                                        ft.DataColumn(ft.Text("Рейтинг"), numeric=True),
+                                    ],
+                                )
+                            ],
+                        ),
+                        expand=True,
+                    )
+                ],
+                expand=True
+            )
+        ]
+
+        if books and author:
+            self.fill_datatable(books, author)
 
     def on_submit_handler(self, event):
         value = event.control.value
-        self.author_text_field.current.value = ""
-        self.author_books_datatable.current.rows = []
+        self.author_textfield.current.value = ""
+        self.book_datatable.current.rows = []
+        self.page.client_storage.clear()
 
         self.page.title = "Library Manager"
         self.page.update()
 
-        if author := self.fantlab_parser.get_author_info(value):
-            self.page.title = f"Автор: {value}"
-            self.page.update()
+        books = FantlabParser.search_books(value)
 
-            for index, book in enumerate(author.books, 1):
-                self.author_books_datatable.current.rows.append(
-                    ft.DataRow(
-                        on_select_changed=self.on_select_changed_handler,
-                        cells=[
-                            ft.DataCell(ft.Text(f"{index}")),
-                            ft.DataCell(ft.Text(book.name)),
-                            ft.DataCell(ft.Text(book.book_type)),
-                            ft.DataCell(ft.Text(book.year)),
-                            ft.DataCell(ft.Text(book.rating)),
-                            ft.DataCell(ft.Text(author.surname)),
-                            ft.DataCell(ft.Text(book.link)),
-                        ],
-                    ),
-                )
-
-            self.page.update()
+        if len(books) > 0:
+            self.page.client_storage.set("books", books)
+            self.page.client_storage.set("author", value)
+            self.fill_datatable(books, value)
         else:
             notification = Notify()
             notification.title = "Library Manager"
             notification.message = f"Автор '{value}' не найден"
             notification.send()
 
+    def fill_datatable(self, books, author):
+        self.page.title = f"Автор: {author}"
+        self.page.update()
+
+        for index, book in enumerate(books, 1):
+            self.book_datatable.current.rows.append(
+                ft.DataRow(
+                    on_select_changed=self.on_select_changed_handler,
+                    cells=[
+                        ft.DataCell(ft.Text(f"{index}")),
+                        ft.DataCell(ft.Text(book['name'])),
+                        ft.DataCell(ft.Text(book['book_type'])),
+                        ft.DataCell(ft.Text(book['year'])),
+                        ft.DataCell(ft.Text(book['rating'])),
+                        ft.DataCell(ft.Text(book['link'])),
+                        ft.DataCell(ft.Text(book['uuid'])),
+                    ],
+                ),
+            )
+
+        self.page.update()
+
     def on_select_changed_handler(self, event):
-        book_name = event.control.cells[1].content.value
-        author_name = event.control.cells[-2].content.value
-
-        book = self.flibusta_parser.get_books(author_name, book_name)
-
-        print(book)
+        book_uuid = event.control.cells[-1].content.value
+        # book = self.flibusta_parser.get_books(author_name, book_name)
+        self.page.go(f"/book/{book_uuid}")
