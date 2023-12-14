@@ -23,12 +23,12 @@ class BookView(ft.View):
                         expand=True
                     ),
                     ft.Container(
-                        margin=ft.margin.only(left=30, top=40, right=0, bottom=0),
+                        margin=ft.margin.only(left=30, top=0, right=0, bottom=0),
                         width=float("inf"),
                         height=float("inf"),
                         content=ft.Column(
                             alignment=ft.MainAxisAlignment.CENTER,
-                            # horizontal_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.START,
                             controls=[
                                 ft.Text(f"Автор: {self.page.client_storage.get('author')}"),
                                 ft.Text(f"Название: {book_info['name']}"),
