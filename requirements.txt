@@ -5,7 +5,7 @@ rapidfuzz~=3.5.2
 pysocks~=1.7.1
 pymorphy2~=0.9.1
 lxml~=4.9.3
-flet==0.12.2
+flet==0.16.0
 
 
 
