@@ -8,6 +8,7 @@ from parsers import FantlabParser
 
 
 class BookView(ft.View):
+
     def __init__(self, page: ft.Page, route: str):
         super().__init__(route=route)
         self.page = page
@@ -15,54 +16,83 @@ class BookView(ft.View):
 
         book_info = list(filter(lambda b: b['uuid'] == book_uuid, self.page.client_storage.get("books")))[0]
 
-        translations = FantlabParser.get_book_translations(book_info['link'])
+        # translations = FantlabParser.get_book_translations(book_info['link'])
+        # content = ft.Dropdown(
+        #     label="Перевод",
+        #     hint_text="Выберите перевод произведения",
+        #     options=[
+        #         Option(f"{tr['persons']} ({tr['year']} года), {tr['count']} изданий")
+        #         for tr in translations
+        #     ],
+        #     autofocus=True
+        # ),
+
+        self.padding = 0
 
         self.controls = [
-            ft.Row(
+            ft.Column(
                 spacing=0,
-                alignment=ft.MainAxisAlignment.START,
                 controls=[
                     ft.Container(
                         margin=0,
                         width=float("inf"),
-                        height=float("inf"),
-                        expand=True
-                    ),
-                    ft.Container(
-                        margin=ft.margin.only(left=30, top=0, right=0, bottom=0),
-                        width=float("inf"),
-                        height=float("inf"),
                         content=ft.Column(
                             alignment=ft.MainAxisAlignment.CENTER,
-                            horizontal_alignment=ft.CrossAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             controls=[
-                                ft.Text(f"Автор: {self.page.client_storage.get('author')}"),
-                                ft.Text(f"Название: {book_info['name']}"),
-                                ft.Text(f"Тип произведения: {book_info['book_type']}"),
-                                ft.Text(f"Год написания: {book_info['year']}"),
-                                ft.Text(f"Рейтинг: {book_info['rating']}"),
-                                ft.Dropdown(
-                                    label="Перевод",
-                                    hint_text="Выберите перевод произведения",
-                                    options=[
-                                        Option(f"{tr['persons']} ({tr['year']} года), {tr['count']} изданий")
-                                        for tr in translations
-                                    ],
-                                    autofocus=True
-                                ),
-                                ft.ElevatedButton(
-                                    "Открыть на fantlab.ru",
-                                    on_click=lambda _: webbrowser.open_new(book_info['link'])
-                                ),
-                                ft.ElevatedButton(
-                                    "Назад",
-                                    on_click=lambda _: page.go("/main")
-                                )
-                            ]
+                                ft.Text(f"Автор: {self.page.client_storage.get('author')}", size=16),
+                                ft.Text(f"Название: {book_info['name']}", size=16),
+                                ft.Text(f"Тип произведения: {book_info['book_type']}", size=16),
+                                ft.Text(f"Год написания: {book_info['year']}", size=16),
+                                ft.Text(f"Рейтинг: {book_info['rating']}", size=16),
+                            ],
+                            expand=True
                         ),
-                        expand=True
-                    )
+                        expand=60
+                    ),
+                    ft.Container(
+                        margin=0,
+                        width=float("inf"),
+                        content=ft.Column(
+                            alignment=ft.MainAxisAlignment.START,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                ft.ElevatedButton(
+                                    "Открыть описание на fantlab.ru",
+                                    height=32,
+                                    url=book_info['link'],
+                                    color=ft.colors.BLACK,
+                                    bgcolor=ft.colors.GREEN_700,
+                                    style=ft.ButtonStyle(
+                                        bgcolor=ft.colors.GREEN_700,
+                                        shape=ft.RoundedRectangleBorder(radius=10),
+                                    ),
+                                ),
+                                ft.ElevatedButton(
+                                    "Скачать книгу с флибусты",
+                                    height=32,
+                                    color=ft.colors.BLACK,
+                                    bgcolor=ft.colors.GREEN_700,
+                                    style=ft.ButtonStyle(
+                                        shape=ft.RoundedRectangleBorder(radius=10),
+                                    ),
+                                ),
+                                ft.ElevatedButton(
+                                    "Назад к списку книг",
+                                    height=32,
+                                    on_click=lambda _: page.go("/main"),
+                                    color=ft.colors.BLACK,
+                                    bgcolor=ft.colors.GREEN_700,
+                                    style=ft.ButtonStyle(
+                                        shape=ft.RoundedRectangleBorder(radius=10),
+                                    ),
+                                )
+                            ],
+                            expand=True
+                        ),
+                        expand=40
+                    ),
                 ],
                 expand=True
-            )
+            ),
         ]

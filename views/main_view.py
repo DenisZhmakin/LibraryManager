@@ -38,7 +38,7 @@ class MainView(ft.View):
                             scroll=ft.ScrollMode.HIDDEN,
                             controls=[
                                 ft.DataTable(
-                                    column_spacing=4,
+                                    column_spacing=70,
                                     width=float("inf"),
                                     ref=self.book_datatable,
                                     columns=[

@@ -48,7 +48,7 @@ class FantlabParser:
             book_type = book_plus.split(', ')[-1].capitalize()
 
             # TODO: Включить 'Поэма','Пьеса'.
-            if book_type not in ['Роман', 'Роман-эпопея', 'Повесть', 'Рассказ']:
+            if book_type not in ['Цикл', 'Роман', 'Роман-эпопея', 'Повесть', 'Рассказ']:
                 continue
 
             name = re.sub(r"\[.*]", "", book_title.split('/')[0]).strip()
