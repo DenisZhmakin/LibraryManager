@@ -1,0 +1,11 @@
+# book = FlibustaParser.get_books(author_name, book_name)
+# translations = FantlabParser.get_book_translations(book_info['link'])
+# content = ft.Dropdown(
+#     label="Перевод",
+#     hint_text="Выберите перевод произведения",
+#     options=[
+#         Option(f"{tr['persons']} ({tr['year']} года), {tr['count']} изданий")
+#         for tr in translations
+#     ],
+#     autofocus=True
+# ),
