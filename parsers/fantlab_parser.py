@@ -65,16 +65,22 @@ class FantlabParser:
         return books
 
     @classmethod
-    def get_book_info(cls, book_url: str):
+    def get_book_translations(cls, book_url: str):
+        result = []
         response = requests.get(book_url)
         soup = BeautifulSoup(response.text, 'lxml')
 
-        info_div = soup.select_one("#work-names-unit")
+        translations_div = soup.select_one("#work-translations-unit")
 
-        name_span = info_div.find("span", attrs={"itemprop": "name"}, recursive=True)
-        author_span = info_div.find("a", attrs={"itemprop": "author"}, recursive=True)
+        if not translations_div:
+            return []
 
-        return {
-            'name': name_span.text.strip(),
-            'author': author_span.text.strip()
-        }
+        for translate in translations_div.select("dd"):
+            additional_info = re.findall(r'\d+', translate.find("span", attrs={"dir": "ltr"}).text)
+            result.append({
+                'persons': ",".join([person['title'] for person in translate.select("a.agray")]),
+                'year': additional_info[0],
+                'count': additional_info[1]
+            })
+
+        return result
