@@ -28,7 +28,49 @@ class FlibustaParser:
         return session
 
     @classmethod
-    def get_books(cls, author_surname: str, book_name: str):
+    def find_writer_by_query(cls, query: str):
+        session = cls._get_tor_session()
+
+        response = session.get(
+            url=f"{flibusta_url}/booksearch",
+            params={
+                'ask': query,
+                'cha': 'on'
+            }
+        )
+
+        soup = BeautifulSoup(response.text, 'lxml')
+
+        for elem in soup.select('a[href^="/a/"]'):
+            if elem.parent.name != 'li':
+                continue
+
+            return {
+                'fio': elem.text.strip()
+            }
+
+    @classmethod
+    def get_book_translations(cls, book_url):
+        session = cls._get_tor_session()
+        response = session.get(url=book_url)
+        soup = BeautifulSoup(response.text, 'lxml')
+
+        data_raw = re.search(r'\(перевод:.*\)', soup.text)
+
+        if not data_raw:
+            return []
+
+        translations = []
+
+        for tr in data_raw.group(0).replace('(перевод: ', '').replace(')', '').split(','):
+            translations.append({
+                'translator': tr.split()[-1]
+            })
+
+        return translations
+
+    @classmethod
+    def get_book_list(cls, author_surname: str, book_name: str):
         session = cls._get_tor_session()
 
         response = session.get(
@@ -51,18 +93,19 @@ class FlibustaParser:
 
         books = []
         for index, book_div in enumerate(books_form.findAll("div"), 1):
+            book_url = flibusta_url + book_div.select_one('a[href^="/b/"]')['href']
+            translations = cls.get_book_translations(book_url)
+
             books.append({
                 'name': book_name,
                 'size': book_div.find("span", {"style": "size"}).text,
+                'translations': translations,
                 'ratio': fuzz.WRatio(book_name, book_div.find("a", href=re.compile(r'^/b/\d*$')).text),
                 'rating': RATING.get(book_div.find("img")['title']),
-                'link': flibusta_url + book_div.find("a", href=re.compile(r'fb2$'))['href'],
+                'link': book_url,
                 'order': index
             })
 
         books = sorted(books, key=orderby('rating ASC, ratio ASC, order DESC'), reverse=True)
 
-        if len(books) == 0:
-            return None
-
-        return books[0]
+        return books

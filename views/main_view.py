@@ -1,7 +1,7 @@
 import flet as ft
 from notifypy import Notify
 
-from parsers import FantlabParser, FlibustaParser
+from parsers import FantlabParser
 
 
 class MainView(ft.View):
@@ -106,5 +106,4 @@ class MainView(ft.View):
 
     def on_select_changed_handler(self, event):
         book_uuid = event.control.cells[-1].content.value
-        # book = self.flibusta_parser.get_books(author_name, book_name)
         self.page.go(f"/book/{book_uuid}")

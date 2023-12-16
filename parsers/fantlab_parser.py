@@ -53,6 +53,9 @@ class FantlabParser:
 
             name = re.sub(r"\[.*]", "", book_title.split('/')[0]).strip()
 
+            if not name:
+                continue
+
             books.append({
                 'name': name,
                 'book_type': book_type,

@@ -22,16 +22,19 @@ def main(page: ft.Page):
 
     def route_change(route: ft.RouteChangeEvent):
         page.views.clear()
+        router = ft.TemplateRoute(page.route)
 
         if route.data == "/main":
             page.views.append(
                 MainView(page=page, route="/main")
             )
 
-        if "/book" in route.data:
+        if router.match("/book/:uuid"):
+            book_info = list(filter(lambda b: b['uuid'] == router.uuid, page.client_storage.get("books")))[0]
             page.views.append(
-                BookView(page=page, route="/book")
+                BookView(page=page, route="/book", book_info=book_info)
             )
+
         page.update()
 
     page.on_route_change = route_change

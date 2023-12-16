@@ -1,31 +1,14 @@
-import webbrowser
-
 import flet as ft
-from flet_core.dropdown import Option
-from repath import match
 
-from parsers import FantlabParser
+from parsers import FlibustaParser
 
 
 class BookView(ft.View):
 
-    def __init__(self, page: ft.Page, route: str):
+    def __init__(self, page: ft.Page, route: str, book_info: dict):
         super().__init__(route=route)
         self.page = page
-        book_uuid = match('/book/:uuid', page.route).groupdict()['uuid']
-
-        book_info = list(filter(lambda b: b['uuid'] == book_uuid, self.page.client_storage.get("books")))[0]
-
-        # translations = FantlabParser.get_book_translations(book_info['link'])
-        # content = ft.Dropdown(
-        #     label="Перевод",
-        #     hint_text="Выберите перевод произведения",
-        #     options=[
-        #         Option(f"{tr['persons']} ({tr['year']} года), {tr['count']} изданий")
-        #         for tr in translations
-        #     ],
-        #     autofocus=True
-        # ),
+        self.book_info = book_info
 
         self.padding = 0
 
@@ -71,6 +54,7 @@ class BookView(ft.View):
                                 ft.ElevatedButton(
                                     "Скачать книгу с флибусты",
                                     height=32,
+                                    on_click=self.download_book_handler,
                                     color=ft.colors.BLACK,
                                     bgcolor=ft.colors.GREEN_700,
                                     style=ft.ButtonStyle(
@@ -96,3 +80,10 @@ class BookView(ft.View):
                 expand=True
             ),
         ]
+
+    def download_book_handler(self, _):
+        # translations = FantlabParser.get_book_translations(book_info['link'])
+
+        author_fio = FlibustaParser.find_writer_by_query(self.page.client_storage.get('author'))
+        books = FlibustaParser.get_book_list(author_fio['fio'].split()[-1], self.book_info['name'])
+        print(books)
