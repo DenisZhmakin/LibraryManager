@@ -1,5 +1,6 @@
 import flet as ft
 
+from entities import Book
 from parsers import FlibustaParser
 
 
@@ -83,6 +84,7 @@ class BookView(ft.View):
 
     def download_book_handler(self, _):
         # translations = FantlabParser.get_book_translations(book_info['link'])
-        author_fio = FlibustaParser.find_writer_by_query(self.page.client_storage.get('author'))
-        books = FlibustaParser.get_book_list(author_fio['fio'].split()[-1], self.book_info['name'])
-        print(books)
+        # author_fio = FlibustaParser.find_writer_by_query(self.page.client_storage.get('author'))
+        # books = FlibustaParser.get_book_list(author_fio['fio'].split()[-1], self.book_info['name'])
+        book = Book.extract_data_from_url(self.book_info['link'])
+        print(book)
