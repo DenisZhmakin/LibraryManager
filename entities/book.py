@@ -1,10 +1,12 @@
 import re
-from typing import Union
+from typing import Union, Tuple
 
 import requests
 from bs4 import BeautifulSoup, Tag
 
 from dataclasses import dataclass, field
+
+from utils import get_book_type
 
 
 @dataclass
@@ -12,7 +14,7 @@ class Book:
     title: str
     author: str
     book_type: str
-    writing_year: Union[int, (int, int)]
+    writing_year: Union[int, Tuple[int, int]]
 
     alternative_titles: list[str] = field(default_factory=list)
 
@@ -22,17 +24,6 @@ class Book:
         soup = BeautifulSoup(response.text, 'lxml')
 
         general_info = soup.select_one("div#work-names-unit")
-
-        def get_book_type(tag: Tag):
-            for elem in ['Цикл', 'Роман', 'Роман-эпопея', 'Повесть', 'Рассказ']:
-                book_type = tag.find(lambda t: elem in t.text)
-
-                if not book_type:
-                    continue
-
-                return elem
-            else:
-                return False
 
         alternative_titles_tag = general_info.find("p", text=re.compile("^Другие названия:"))
 
