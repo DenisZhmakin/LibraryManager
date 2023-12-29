@@ -33,12 +33,18 @@ class Book:
         else:
             alternative_titles = []
 
-        date_published_tag = general_info.select_one('span[itemprop="datePublished"]')
+        book_type = get_book_type(general_info)
+
+        if book_type in ['Цикл', 'Роман-эпопея']:
+            writing_year = (0, 0)
+        else:
+            date_published_tag = general_info.select_one('span[itemprop="datePublished"]')
+            writing_year = int(date_published_tag.text.strip()) if date_published_tag else 0
 
         return cls(
             title=general_info.select_one('span[itemprop="name"]').text.strip(),
             author=general_info.select_one('a[itemprop="author"]').text.strip(),
-            writing_year=int(date_published_tag.text.strip()) if date_published_tag else 0,
             alternative_titles=alternative_titles,
             book_type=get_book_type(general_info),
+            writing_year=writing_year,
         )
