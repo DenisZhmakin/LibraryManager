@@ -85,7 +85,7 @@ class BookView(ft.View):
         ]
 
     def download_book_handler(self, _):
-        is_automatic = self.translate_checkbox.current.value
+	is_automatic = self.translate_checkbox.current.value
 
         if is_automatic:
             translations = FantlabParser.get_book_translations(self.book_info['link'])
