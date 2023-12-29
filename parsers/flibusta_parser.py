@@ -1,4 +1,5 @@
 import re
+from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -61,16 +62,13 @@ class FlibustaParser:
             return []
 
         translations = []
-
         for tr in data_raw.group(0).replace('(перевод: ', '').replace(')', '').split(','):
-            translations.append({
-                'translator': tr.split()[-1]
-            })
+            translations.append(tr.strip().split()[-1])
 
-        return translations
+        return sorted(translations)
 
     @classmethod
-    def get_book_list(cls, author_surname: str, book_name: str):
+    def get_book_variant(cls, author_surname: str, book_name: str, translators: Optional[dict] = None):
         session = cls._get_tor_session()
 
         response = session.get(
@@ -99,7 +97,7 @@ class FlibustaParser:
             books.append({
                 'name': book_name,
                 'size': book_div.find("span", {"style": "size"}).text,
-                'translations': translations,
+                'translators': translations,
                 'ratio': fuzz.WRatio(book_name, book_div.find("a", href=re.compile(r'^/b/\d*$')).text),
                 'rating': RATING.get(book_div.find("img")['title']),
                 'link': book_url,
@@ -108,4 +106,11 @@ class FlibustaParser:
 
         books = sorted(books, key=orderby('rating ASC, ratio ASC, order DESC'), reverse=True)
 
-        return books
+        if translators:
+            for book in books:
+                if book['translators'] == translators['translators']:
+                    return book
+            else:
+                return books[0]
+        else:
+            return books[0]

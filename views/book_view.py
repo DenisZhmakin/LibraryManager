@@ -1,6 +1,6 @@
 import flet as ft
 
-from parsers import FlibustaParser
+from parsers import FlibustaParser, FantlabParser
 
 
 class BookView(ft.View):
@@ -9,6 +9,8 @@ class BookView(ft.View):
         super().__init__(route=route)
         self.page = page
         self.book_info = book_info
+
+        self.translate_checkbox = ft.Ref[ft.Checkbox]()
 
         self.padding = 0
 
@@ -36,6 +38,7 @@ class BookView(ft.View):
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 controls=[
                                     ft.Checkbox(
+                                        ref=self.translate_checkbox,
                                         label="Автоматический выбор перевода",
                                         active_color=ft.colors.GREEN_700,
                                         value=True
@@ -82,7 +85,14 @@ class BookView(ft.View):
         ]
 
     def download_book_handler(self, _):
-        # translations = FantlabParser.get_book_translations(book_info['link'])
-        author_fio = FlibustaParser.find_writer_by_query(self.page.client_storage.get('author'))
-        books = FlibustaParser.get_book_list(author_fio['fio'].split()[-1], self.book_info['name'])
-        print(books)
+        is_automatic = self.translate_checkbox.current.value
+
+        if is_automatic:
+            translations = FantlabParser.get_book_translations(self.book_info['link'])
+            author_fio = FlibustaParser.find_writer_by_query(self.page.client_storage.get('author'))
+            book = FlibustaParser.get_book_variant(
+                author_fio['fio'].split()[-1], self.book_info['name'], translations
+            )
+            print(book)
+        else:
+            pass

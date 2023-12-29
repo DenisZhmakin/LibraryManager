@@ -5,6 +5,8 @@ from collections import Counter
 import requests
 from bs4 import BeautifulSoup
 
+from libs.sorter import orderby
+
 fantlab_url = "https://fantlab.ru"
 
 
@@ -69,21 +71,36 @@ class FantlabParser:
 
     @classmethod
     def get_book_translations(cls, book_url: str):
-        result = []
+        translations = []
         response = requests.get(book_url)
         soup = BeautifulSoup(response.text, 'lxml')
 
         translations_div = soup.select_one("#work-translations-unit")
 
         if not translations_div:
-            return []
+            return False
 
-        for translate in translations_div.select("dd"):
-            additional_info = re.findall(r'\d+', translate.find("span", attrs={"dir": "ltr"}).text)
-            result.append({
-                'persons': ",".join([person['title'] for person in translate.select("a.agray")]),
-                'year': additional_info[0],
-                'count': additional_info[1]
-            })
+        is_russian = False
+        for tag in translations_div.select_one("dl").findAll(["dt", "dd"]):
+            if tag.name == "dt":
+                if tag.text == "Перевод на русский:":
+                    is_russian = True
+                else:
+                    is_russian = False
+            else:
+                if is_russian:
+                    additional_info = re.findall(r'\d+', tag.find("span", attrs={"dir": "ltr"}).text)
+                    translations.append({
+                        'translators': sorted(
+                            [person['title'].strip().split()[-1] for person in tag.select("a.agray")]
+                        ),
+                        'count': int(additional_info[1]),
+                        'year': int(additional_info[0])
+                    })
 
-        return result
+        if len(translations) == 0:
+            return False
+
+        translation = sorted(translations, key=orderby('count ASC, year ASC'), reverse=True)[0]
+
+        return translation
